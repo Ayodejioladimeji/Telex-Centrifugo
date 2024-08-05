@@ -9,7 +9,6 @@ import MsgDisplay from './MsgDisplay';
 import { useRouter } from 'next/router';
 import styles from '../styles/RightSide.module.css';
 import { Centrifuge, Subscription } from "centrifuge";
-import { useParams } from "next/navigation";
 import { DataContext } from '@/store/GlobalState';
 
 interface Message {
@@ -40,10 +39,11 @@ const RightSide = () => {
     if (slug){
       // Initialize Centrifuge client
       const centrifugeClient: any = new Centrifuge(
-        "ws://localhost:8000/connection/websocket",
+        "wss://deployment.api-golang.boilerplate.hng.tech/centrifugo/connection/websocket",
         {
-          token:""
-            
+          token:
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0ODU2NTgsImlhdCI6MTcyMjg4MDg1OH0.BX4gDceZoFYCq0FTOoqc2jGp_5pS41uz_-9QMqMWbDk",
+            // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0MjY2NzIsImlhdCI6MTcyMjgyMTg3Mn0.zhB3jD1MWGWd0dCTRLOoJvTrhgS3imTbYSUy9--xK8M",
         },
       );
 
@@ -88,7 +88,7 @@ const RightSide = () => {
       // Cleanup on component unmount
       return () => {
         sub.unsubscribe();
-        // centrifugeClient.disconnect();
+        centrifugeClient.disconnect();
       };
     }
 
