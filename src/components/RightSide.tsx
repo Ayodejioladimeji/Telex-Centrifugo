@@ -42,8 +42,8 @@ const RightSide = () => {
       const centrifugeClient: any = new Centrifuge(
         "ws://localhost:8000/connection/websocket",
         {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0MjY2NzIsImlhdCI6MTcyMjgyMTg3Mn0.zhB3jD1MWGWd0dCTRLOoJvTrhgS3imTbYSUy9--xK8M",
+          token:""
+            
         },
       );
 
