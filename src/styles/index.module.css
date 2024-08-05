@@ -1,0 +1,108 @@
+.conversation {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.left_conversation {
+  background: var(--white);
+  max-width: 300px;
+  width: 100%;
+  box-shadow: var(--shadoos);
+  border-right: 1px solid var(--deep);
+  position: relative;
+  overflow-y: auto;
+}
+
+.left_conversations {
+  background: var(--white);
+  max-width: 300px;
+  width: 100%;
+  box-shadow: var(--shadoos);
+  border-right: 1px solid var(--deep);
+  position: relative;
+  overflow-y: auto;
+}
+
+.left_conversation::-webkit-scrollbar,
+.left_conversations::-webkit-scrollbar {
+  display: none;
+}
+
+.right_conversation {
+  width: 100%;
+  height: 100vh;
+}
+
+.conversate {
+  width: 100%;
+  height: 100vh;
+}
+
+.conversate::-webkit-scrollbar {
+  display: none;
+}
+
+.right_center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.right_center h4 {
+  font-size: var(--font-mid);
+  font-family: var(--mukta);
+  color: var(--primary);
+}
+
+.right_center p {
+  color: var(--non-active);
+  text-align: center;
+}
+
+.friends {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--deep);
+}
+
+/* ----------------------------------------- */
+/* THE SECTION OF THE RESPONSIVENESS */
+@media screen and (min-width: 900px) {
+  .left_conversation {
+    max-width: 300px;
+  }
+
+  .right_conversation {
+    width: 70%;
+  }
+}
+
+@media screen and (max-width: 766px) {
+  .message {
+    height: calc(100vh - 100px);
+  }
+
+  .left_conversation {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .left_conversations {
+    max-width: 300px;
+    display: none;
+  }
+
+  .right_conversation {
+    display: none;
+  }
+
+  .right_conversation,
+  .conversate {
+    width: 100%;
+  }
+}

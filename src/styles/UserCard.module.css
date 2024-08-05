@@ -1,0 +1,47 @@
+.user_card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--white);
+  z-index: 9;
+  margin-bottom:20px;
+  border:1px solid #999;
+  padding:5px 10px;
+  cursor: pointer;
+}
+
+.user_card .user_link {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.user_link img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  object-fit: cover;
+}
+
+.user_card_div {
+  display: flex;
+  flex-direction: column;
+}
+
+.user_card_div span {
+  color: var(--secondary);
+  font-weight: bold;
+  font-size: var(--font-smalling);
+}
+
+.user_card_div small {
+  color: var(--tetiary);
+  font-size: var(--font-smaller);
+  opacity: 0.7;
+  font-family: var(--mont);
+}

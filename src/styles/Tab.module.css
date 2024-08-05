@@ -1,0 +1,103 @@
+.tabcontainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--white);
+  width: 100%;
+  padding-top: 70px;
+}
+
+.tabcenter {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.tab_underline {
+  border-bottom: 1px solid var(--deep);
+}
+
+.bloctabs {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  transition: var(--transition);
+}
+
+.bloctabs button {
+  width: 100%;
+  font-size: var(--font-small);
+  border: none;
+  outline: none;
+  padding: 10px;
+  text-align: center;
+}
+
+.tabs {
+  cursor: pointer;
+  color: var(--non-active);
+  font-weight: 600;
+  background: #fff;
+}
+
+.activetabs {
+  cursor: pointer;
+  font-weight: 600;
+  background: #fff;
+  color: var(--primary);
+  border-bottom: 1px solid var(--primary) !important;
+}
+
+/* ================================================= */
+/* THE SECTION OF THE CONTENT */
+.contenttabs {
+  flex-grow: 1;
+}
+
+.content {
+  background: none;
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+#content {
+  background: none;
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+.content h2 {
+  padding: 0px 0 5px 0px;
+  font-size: 18px;
+}
+
+.content p {
+  width: 100%;
+  height: 100%;
+}
+
+.activecontent {
+  display: block;
+  background: none;
+  padding: 20px 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mobiletab {
+  display: none;
+}
+
+/* ================================== */
+/* THE SECTION OF THE MEDIA QUERY */
+
+@media screen and (max-width: 800px) {
+  .bloctabs {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
