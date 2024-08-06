@@ -2,10 +2,10 @@ import React from 'react';
 import ChatList from './ChatList';
 
 
-const LeftSide = () => {
+const LeftSide = ({showNav, setShowNav}) => {
   return (
     <div style={{ position: 'relative' }}>
-      <ChatList />
+      <ChatList showNav={showNav} setShowNav={setShowNav} />
     </div>
   );
 };

@@ -22,9 +22,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
 
   // handle submit
-  const handleSubmit = () => {
+  const handleSubmit = (values) => {
     const user = JSON.parse(localStorage.getItem("user"))
-    if(!user){
+    if(user?.email !== values?.email){
       cogoToast.error("Account not found")
       return 
     }
@@ -41,7 +41,7 @@ const Login = () => {
       initialValues={{ email: '', password: '' }}
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
-          handleSubmit()
+          handleSubmit(values)
           setSubmitting(false);
         }, 500);
       }}

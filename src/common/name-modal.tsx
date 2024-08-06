@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { Modal } from "react-bootstrap";
 import styles from "@/styles/modal.module.css"
 import { useRouter } from "next/router";
+import cogoToast from "cogo-toast";
 
 //
 
@@ -14,6 +15,12 @@ const NameModal = () => {
 
   // handle join
   const handleJoin = () => {
+    const user = JSON.parse(localStorage.getItem("user"))
+    const trimedName = name.trim()
+
+    if (user?.username && trimedName !== user.username) {
+      return cogoToast.error(`Please use your Login username, ${user?.username}`);
+    }
 
     router.push(`/message/${state?.route}`)
     dispatch({type:ACTIONS.USER, payload:name})
@@ -36,7 +43,7 @@ const NameModal = () => {
 
         <div className={styles.form_box}>
           <label>
-            Enter your dislay name to join
+            Enter your display name to join
           </label>
           <input type="name" value={name} onChange={(e) => setName(e.target.value)} />
         </div>

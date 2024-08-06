@@ -10,13 +10,14 @@ import { useRouter } from 'next/router';
 import styles from '../styles/RightSide.module.css';
 import { Centrifuge, Subscription } from "centrifuge";
 import { DataContext } from '@/store/GlobalState';
+import { FaAlignJustify } from 'react-icons/fa';
 
 interface Message {
   user: string;
   message: string;
 }
 
-const RightSide = () => {
+const RightSide = ({showNav, setShowNav}) => {
   const router = useRouter()
   const refDisplay = useRef(null);
   const pageEnd = useRef(null);
@@ -29,11 +30,13 @@ const RightSide = () => {
   const {state} = useContext(DataContext)
   const [user, setUser] = useState(null)
 
+
   // get login user
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"))
     setUser(user?.username)
   }, [])
+  
 
   useEffect(() => {
     if (slug){
@@ -98,9 +101,7 @@ const RightSide = () => {
 
   const sendMessage = (e: FormEvent) => {
     e.preventDefault();
-    console.log(centrifuge)
     if (message.trim() && centrifuge) {
-      console.log(message)
       subscription?.publish({ user:state?.user, message }).catch((error) => {
         console.error("Publish error:", error.message);
       });
@@ -108,13 +109,16 @@ const RightSide = () => {
     }
   };
 
-
+// 
 
   return (
     <Fragment>
 
       <div className={styles.message_header}>
-        <p>{state?.user}</p>
+        <div className="d-flex align-items-center gap-3">
+          <FaAlignJustify className={styles.icons}  onClick={() => setShowNav(!showNav)}/>
+          <p className="mb-0">{state?.user}</p>
+        </div>
       </div>
 
       <div
@@ -123,7 +127,7 @@ const RightSide = () => {
         <div className={styles.chat_display} ref={refDisplay}>
           <button ref={pageEnd}>Load more</button>
 
-          {messages.map((msg, index) => (
+          {messages?.map((msg, index) => (
             <div key={index}>
               {msg?.user !== user && <div className={`${styles.chat_row} ${styles.other_message}`}>
                   <MsgDisplay msg={msg}/>

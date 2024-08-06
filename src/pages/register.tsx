@@ -25,7 +25,13 @@ const Register = () => {
 
   // handle submit
   const handleSubmit = (values) => {
-    localStorage.setItem("user", JSON.stringify(values))
+    const payload = {
+      email : values.email,
+      username:values.username.trim().toLowerCase(),
+      password:values.password
+    }
+
+    localStorage.setItem("user", JSON.stringify(payload))
     cogoToast.success('Account Created Successfully')
     router.push("/")
   }
@@ -212,7 +218,7 @@ const Register = () => {
                       </div>
 
                       <div className={styles.form_group}>
-                        <button type='submit' disabled={isSubmitting}>
+                        <button type='submit'>
                           {loading === true ? (
                             "Loading..."
                           ) : (

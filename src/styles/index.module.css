@@ -10,18 +10,22 @@
   width: 100%;
   box-shadow: var(--shadoos);
   border-right: 1px solid var(--deep);
-  position: relative;
+  position: fixed;
+  height:100vh;
   overflow-y: auto;
+  
 }
 
-.left_conversations {
+.new_left_conversations {
   background: var(--white);
   max-width: 300px;
   width: 100%;
   box-shadow: var(--shadoos);
   border-right: 1px solid var(--deep);
-  position: relative;
+  position: fixed;
   overflow-y: auto;
+  height:100vh;
+  z-index:2;
 }
 
 .left_conversation::-webkit-scrollbar,
@@ -34,9 +38,10 @@
   height: 100vh;
 }
 
-.conversate {
+.new_right_conversations {
   width: 100%;
   height: 100vh;
+  margin-left:300px;
 }
 
 .conversate::-webkit-scrollbar {
@@ -76,33 +81,23 @@
   .left_conversation {
     max-width: 300px;
   }
-
-  .right_conversation {
-    width: 70%;
-  }
 }
 
-@media screen and (max-width: 766px) {
-  .message {
-    height: calc(100vh - 100px);
-  }
-
-  .left_conversation {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .left_conversations {
+@media (max-width:700px){
+  .new_left_conversations {
     max-width: 300px;
-    display: none;
+    transform:translateX(-100%);
+    transition:all 0.3s linear;
+    
   }
 
-  .right_conversation {
-    display: none;
+  .show_left_conversations{
+    transform:translateX(0);
+     transition:all 0.3s linear;
   }
 
-  .right_conversation,
-  .conversate {
-    width: 100%;
+  .new_right_conversations{
+    margin-left:0;
+    transition:all 0.3s linear;
   }
 }
