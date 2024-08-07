@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import styles from '../styles/LeftSide.module.css';
 import { useRouter } from 'next/router';
 import UserCard from './UserCard';
@@ -7,25 +8,56 @@ import { DataContext } from '@/store/GlobalState';
 import cogoToast from 'cogo-toast';
 import { FaAlignJustify } from 'react-icons/fa';
 
-const ChatList = ({showNav, setShowNav}) => {
+interface User {
+  user_id: string;
+  username: string;
+}
+
+
+interface Room {
+  room_id: string;
+  name: string;
+  description: string;
+  users: User[] | null;
+  created_at: string;
+  deleted_at: string;
+}
+
+const ChatList = ({ showNav, setShowNav }) => {
   const router = useRouter();
   const [create, setCreate] = useState(false);
-  const [room, setRoom] = useState<string[]>([]);
+  const [room, setRoom] = useState<Room[]>([]);
   const [name, setName] = useState("");
   const { dispatch } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
 
-  // Load existing rooms from localStorage on component mount
+  // Load existing rooms from database on component mount
   useEffect(() => {
-    const storedNames = localStorage.getItem("room");
-    if (storedNames) {
-      setRoom(JSON.parse(storedNames));
-    }
-    setLoading(false);
+    const fetchRooms = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        console.log("token", accessToken)
+        const user = localStorage.getItem('user');
+        const response = await axios.get("https://api-golang.boilerplate.hng.tech/api/v1/rooms", {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+
+        console.log(response.data)
+        setRoom(response.data.data);
+      } catch (error) {
+        cogoToast.error(error.message)
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRooms();
   }, []);
 
   // Create room
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (name.trim() !== "") {
@@ -34,23 +66,71 @@ const ChatList = ({showNav, setShowNav}) => {
         return cogoToast.error("Room name cannot include space");
       }
 
-      // check if room is already created
-      if(room.includes(name.trim().toLowerCase())){
+      const lowerCaseName = name.trim().toLowerCase();
+      const roomNames = room.map(r => r.name.toLowerCase());
+      if (roomNames.includes(lowerCaseName)) {
         return cogoToast.error("Room already exists");
       }
 
-      const updatedList = [...room, name.trim().toLowerCase()];
-      setRoom(updatedList);
-      localStorage.setItem("room", JSON.stringify(updatedList));
-      setName("");
+      setLoading(true);
+      const accessToken = localStorage.getItem('access_token');
+      const user = localStorage.getItem('user');
+      const userData = user ? JSON.parse(user) : {};
+      const response = await axios.post("https://api-golang.boilerplate.hng.tech/api/v1/rooms", {
+        name: name.trim(),
+        username: userData.username || '',
+        description: name.trim()
+      }, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (response?.status !== 201) {
+        cogoToast.error("Channel not created successfully")
+        return
+      } else {
+        const updatedList = [...room, response.data];
+        setRoom(updatedList);
+        cogoToast.success("channel created successfully");
+        setName("");
+      }
+      setLoading(false);
     }
   };
 
   // Remove room
-  const handleRemove = (roomName: string) => {
-    const updatedList = room.filter((item) => item !== roomName);
-    setRoom(updatedList);
-    localStorage.setItem("room", JSON.stringify(updatedList));
+  const handleRemove = async (roomId: string) => {
+    // Check if the room ID exists in the list
+    const roomToRemove = room.find(item => item.room_id === roomId);
+    if (!roomToRemove) {
+      return cogoToast.error("Room not found.");
+    }
+
+    setLoading(true);
+    const accessToken = localStorage.getItem('access_token');
+    const response = await axios.post(
+      `https://api-golang.boilerplate.hng.tech/api/v1/rooms/${roomId}/leave`,
+      {},
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      }
+    );
+
+    console.log(response);
+    if (response?.status !== 200) {
+      cogoToast.error("An error occurred while leaving the room.");
+      return
+    }
+    else {
+      console.log(room)
+      const updatedList = room.filter(item => item.room_id !== roomId);
+      setRoom(updatedList);
+      cogoToast.success("Successfully left the room.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -73,7 +153,7 @@ const ChatList = ({showNav, setShowNav}) => {
       <hr />
 
       {room?.map((item, index) => (
-        <UserCard item={item} key={index} onRemove={handleRemove} />
+        <UserCard id={item.room_id} item={item.name} key={index} onRemove={handleRemove} />
       ))}
 
       {!loading && room?.length === 0 && (

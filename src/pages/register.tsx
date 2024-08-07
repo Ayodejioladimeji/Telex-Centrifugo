@@ -24,7 +24,7 @@ const Register = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://staging.api-golang.boilerplate.hng.tech/api/v1/auth/register",
+        "https://api-golang.boilerplate.hng.tech/api/v1/auth/register",
         {
           method: "POST",
           headers: {
@@ -83,7 +83,7 @@ const Register = () => {
         <div className={styles.logincontainer}>
           <div className={styles.loginheader}>
             <h1 className={styles.h1}>Create a Telex Account</h1>
-            <p>Welcome! Let's get your profile set up in just a minute.</p>
+            <p>Welcome! Let&apos;s get your profile set up in just a minute.</p>
           </div>
           <Formik
             initialValues={{

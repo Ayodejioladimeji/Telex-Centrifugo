@@ -4,4 +4,5 @@ export const ACTIONS = {
   ROOMS: "ROOMS",
   NAME_MODAL: "NAME_MODAL",
   ROUTE: "ROUTE",
+  ID: "ID",
 };

@@ -33,6 +33,12 @@ const reducers = (state, action) => {
         route: payload,
       };
 
+    case ACTIONS.ID:
+      return {
+        ...state,
+        id: payload,
+      };
+
     default:
       return state;
   }

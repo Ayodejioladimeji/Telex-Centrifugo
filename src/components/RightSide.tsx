@@ -1,8 +1,10 @@
-import React, { FormEvent, Fragment, useState, useEffect, useRef, useContext } from 'react';
+import React, { FormEvent, Fragment, useState, useCallback, useEffect, useRef, useContext } from 'react';
+import axios from 'axios';
 
 // IMPORTED PACKAGES
 import { AiFillPhone } from 'react-icons/ai';
 import { BiSend } from 'react-icons/bi';
+import cogoToast from "cogo-toast";
 
 // IMPORTED COMPONENTS
 import MsgDisplay from './MsgDisplay';
@@ -11,13 +13,15 @@ import styles from '../styles/RightSide.module.css';
 import { Centrifuge, Subscription } from "centrifuge";
 import { DataContext } from '@/store/GlobalState';
 import { FaAlignJustify } from 'react-icons/fa';
+import { type } from 'os';
+
 
 interface Message {
-  user: string;
-  message: string;
+  username: string;
+  content: string;
 }
 
-const RightSide = ({showNav, setShowNav}) => {
+const RightSide = ({ showNav, setShowNav }) => {
   const router = useRouter()
   const refDisplay = useRef(null);
   const pageEnd = useRef(null);
@@ -27,33 +31,96 @@ const RightSide = ({showNav, setShowNav}) => {
   const { slug } = router.query;
   const [centrifuge, setCentrifuge] = useState<Centrifuge | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const {state} = useContext(DataContext)
+  const { state } = useContext(DataContext)
   const [user, setUser] = useState(null)
 
 
   // get login user
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"))
-    setUser(user?.username)
+    const user = localStorage.getItem("user");
+    console.log(user);
+    setUser(JSON.parse(user))
   }, [])
-  
+
+  const getConnectionToken = useCallback(async () => {
+    const accessToken = localStorage.getItem('access_token');
+    const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/token/connection/`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    console.log(response.data.data.token);
+    console.log(typeof (response?.data?.data?.token))
+    const token = response?.data?.data?.token
+    return response?.data?.data?.token
+    // return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNTQ1MDgsImlhdCI6MTcyMzA1NDIwOCwic3ViIjoiMDE5MTJkMDEtMGQ3YS03YTNmLWEzY2ItNDNiMzhjYTkxMzA2In0.U0nbwJYgWWcK8fL78ef_zFqAS5cvIF6aB_Rivexf7lo"
+  }, [])
+
+  const getSubscriptionToken = useCallback(async () => {
+    const accessToken = localStorage.getItem('access_token');
+    const response = await axios.post(`https://api-golang.boilerplate.hng.tech/api/v1/token/subscription/`, {
+      channel: slug
+    }, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    // console.log(response.data.data.token);
+    return response.data.data.token;
+  }, [slug])
+
 
   useEffect(() => {
-    if (slug){
-      // Initialize Centrifuge client
+    if (slug) {
+      const fetchMessages = async () => {
+        try {
+          const accessToken = localStorage.getItem('access_token');
+          const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/messages`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          })
+          setMessages(response.data.data);
+        } catch (error) {
+          cogoToast.error(error.message)
+        }
+      }
+
+      const joinRoom = async () => {
+        try {
+          const accessToken = localStorage.getItem('access_token');
+          const response = await axios.post(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/join`, { "username": user?.username }, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          })
+        } catch (error) {
+          console.log(error)
+          cogoToast.error(error.message)
+        }
+      }
+
+      joinRoom();
+      fetchMessages();
+
       const centrifugeClient: any = new Centrifuge(
-        "wss://deployment.api-golang.boilerplate.hng.tech/centrifugo/connection/websocket",
+        "wss://api-golang.boilerplate.hng.tech/centrifugo/connection/websocket",
         {
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0ODU2NTgsImlhdCI6MTcyMjg4MDg1OH0.BX4gDceZoFYCq0FTOoqc2jGp_5pS41uz_-9QMqMWbDk",
-            // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0MjY2NzIsImlhdCI6MTcyMjgyMTg3Mn0.zhB3jD1MWGWd0dCTRLOoJvTrhgS3imTbYSUy9--xK8M",
+          getToken: getConnectionToken,
+          // debug: true,
+          // token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNTMzODAsInN1YiI6IjAxOTEyZDAxLTBkN2EtN2EzZi1hM2NiLTQzYjM4Y2E5MTMwNiJ9.Mr74BXAzcM_XeBlspGvsYVes2_y_V9P2EDPZCYJMEbE"
+          // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0MjY2NzIsImlhdCI6MTcyMjgyMTg3Mn0.zhB3jD1MWGWd0dCTRLOoJvTrhgS3imTbYSUy9--xK8M",
         },
       );
 
+      console.log("before connection", centrifugeClient)
+
       setCentrifuge(centrifugeClient);
+      console.log(centrifugeClient)
 
       centrifugeClient.on("connect", () => {
         setConnected(true);
+        console.log(connected)
         console.log("Connected to Centrifuge");
       });
 
@@ -63,10 +130,14 @@ const RightSide = ({showNav, setShowNav}) => {
       });
 
       // Create a subscription to the channel
-      const sub = centrifugeClient.newSubscription(`room#${slug}`);
+      const sub = centrifugeClient.newSubscription(slug, {
+        getToken: getSubscriptionToken,
+        debug: true
+      });
 
       sub.on("publication", (ctx: any) => {
         setMessages((prev) => [...prev, ctx.data]);
+        console.log("publication", ctx.data)
       });
 
       sub.on("subscribed", () => {
@@ -85,8 +156,12 @@ const RightSide = ({showNav, setShowNav}) => {
       centrifugeClient.connect();
       sub.subscribe();
 
+      console.log("after connection", centrifugeClient)
+
       // Set subscription state
       setSubscription(sub);
+
+      console.log("subscription state", subscription)
 
       // Cleanup on component unmount
       return () => {
@@ -96,28 +171,53 @@ const RightSide = ({showNav, setShowNav}) => {
     }
 
 
-  }, [slug]);
+  }, [slug, connected, getSubscriptionToken, getConnectionToken, subscription, user?.username]);
 
 
-  const sendMessage = (e: FormEvent) => {
+  const sendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (message.trim() && centrifuge) {
-      subscription?.publish({ user:state?.user, message }).catch((error) => {
-        console.error("Publish error:", error.message);
-      });
-      setMessage("");
+      try {
+        // Publish message to Centrifuge
+        await subscription?.publish({ username: user?.username, content: message });
+        const updatedList = [...messages, { username: user?.username, content: message }];
+        setMessages(updatedList);
+        console.log(messages)
+        const accessToken = localStorage.getItem('access_token');
+        const response = await axios.post(
+          `https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/messages`,
+          {
+            content: message
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        setMessage("");
+        cogoToast.success("Message sent successfully.");
+        console.log(response)
+      } catch (error) {
+        cogoToast.error("Failed to send message.");
+        console.log("error sending message", error)
+      } finally {
+      }
+    } else {
+      cogoToast.error("Message cannot be empty.");
     }
   };
 
-// 
+  // 
 
   return (
     <Fragment>
-
       <div className={styles.message_header}>
         <div className="d-flex align-items-center gap-3">
-          <FaAlignJustify className={styles.icons}  onClick={() => setShowNav(!showNav)}/>
-          <p className="mb-0">{state?.user}</p>
+          <FaAlignJustify className={styles.icons} onClick={() => setShowNav(!showNav)} />
+          <p className="mb-0">{user?.username}</p>
+          <p className="mb-0">{state?.route}</p>
         </div>
       </div>
 
@@ -129,13 +229,13 @@ const RightSide = ({showNav, setShowNav}) => {
 
           {messages?.map((msg, index) => (
             <div key={index}>
-              {msg?.user !== user && <div className={`${styles.chat_row} ${styles.other_message}`}>
-                  <MsgDisplay msg={msg}/>
-                </div>}
+              {msg?.username !== user?.username && <div className={`${styles.chat_row} ${styles.other_message}`}>
+                <MsgDisplay msg={msg} />
+              </div>}
 
-                {msg?.user === user && <div className={`${styles.chat_row} ${styles.you_message}`}>
-                  <MsgDisplay msg={msg}/>
-                </div>}
+              {msg?.username === user?.username && <div className={`${styles.chat_row} ${styles.you_message}`}>
+                <MsgDisplay msg={msg} />
+              </div>}
 
             </div>
           ))}

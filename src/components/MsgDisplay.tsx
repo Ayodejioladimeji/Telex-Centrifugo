@@ -7,10 +7,10 @@ const MsgDisplay = ({ msg}) => {
     <>
       <div className={styles.you_content}>
         <div>
-          {msg.message && (
+          {msg.content && (
             <div className={styles.chat_text}>
-              <small className={styles.time}>{msg.user}</small>
-              {msg.message}
+              <small className={styles.time}>{msg.username}</small>
+              {msg.content}
             </div>
           )}
         </div>
