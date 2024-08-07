@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Formik } from 'formik';
-import * as EmailValidator from 'email-validator';
-import { FaCheck, FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
-
-
-// COMPONENTS
-import styles from '../styles/Register.module.css';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import cogoToast from 'cogo-toast';
-
+import React, { useState } from "react";
+import { Formik } from "formik";
+import * as EmailValidator from "email-validator";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useRouter } from "next/router";
+import styles from "../styles/Login.module.css";
+import Link from "next/link";
+import cogoToast from "cogo-toast";
+import Image from "next/image";
 
 // VALIDATION REGEX
 const passwordUpper = /(?=.*[A-Z])/;
@@ -17,235 +14,264 @@ const passwordSpecial = /(?=.*[!@#$%^&*])/;
 const passwordLower = /(?=.*[a-z])/;
 const passwordRegex = /(?=.*[0-9])/;
 
-// REGISTER COMPONENT
 const Register = () => {
   const [typePass, setTypePass] = useState(false);
   const router = useRouter();
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   // handle submit
-  const handleSubmit = (values) => {
-    const payload = {
-      email : values.email,
-      username:values.username.trim().toLowerCase(),
-      password:values.password
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://staging.api-golang.boilerplate.hng.tech/api/v1/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        cogoToast.success("Registration successful!");
+        router.push(`/`);
+      } else {
+        cogoToast.error(
+          data.message || "Registration failed. Please try again.",
+        );
+      }
+    } catch (error) {
+      cogoToast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("user", JSON.stringify(payload))
-    cogoToast.success('Account Created Successfully')
-    router.push("/")
-  }
-
+  };
 
   return (
-    <Formik
-      initialValues={{ email: '', username: '', password: '' }}
-      onSubmit={(values, { setSubmitting }) => {
-        handleSubmit(values)
-      }}
-      //   HANDLING VALIDATION MESSAGES
-      validate={(values) => {
-        let errors:any = {};
+    <>
+      <div className={styles.logindiv}>
+        <div className={styles.sidea}>
+          <div className={styles.logo}>
+            <Image
+              src={"/logo.png"}
+              width={1000}
+              height={1000}
+              className="logo"
+              alt="logo"
+            />
+          </div>
+          <div className={styles.sec}>
+            <div className={styles.seccontent}>
+              <h1 className={styles.h1}>
+                All Your Notifications In One App!!!
+              </h1>
+              <p className={styles.p}>
+                Get real-time notifications per deliverables and achieve
+                efficient communication with teammates and your deployed
+                solutions.
+              </p>
+            </div>
+            <div className={styles.not}>
+              <Image src={"/com.png"} width={1000} height={1000} alt="log" />
+            </div>
+          </div>
+        </div>
+        <div className={styles.logincontainer}>
+          <div className={styles.loginheader}>
+            <h1 className={styles.h1}>Create a Telex Account</h1>
+            <p>Welcome! Let's get your profile set up in just a minute.</p>
+          </div>
+          <Formik
+            initialValues={{
+              first_name: "",
+              last_name: "",
+              username: "",
+              email: "",
+              password: "",
+            }}
+            onSubmit={(values, { setSubmitting }) => {
+              setTimeout(() => {
+                handleSubmit(values);
+                setSubmitting(false);
+              }, 500);
+            }}
+            validate={(values) => {
+              let errors = {};
 
-        // EMAIL SECTION
-        if (!values.email) {
-          errors.email = 'Email is required';
-        } else if (!EmailValidator.validate(values.email)) {
-          errors.email = 'Invalid email address';
-        }
+              // Firstname validation
+              if (!values.first_name) {
+                errors.first_name = "First name is required";
+              }
 
-        // USERNAME SECTION
-        if (!values.username) {
-          errors.username = 'Username is required';
-        } else if (values.username.length <= 3) {
-          errors.username = 'Username should be more than 3 characters';
-        }
+              // Lastname validation
+              if (!values.last_name) {
+                errors.last_name = "Last name is required";
+              }
 
-        //   THE PASSWORD SECTION
-        if (!values.password) {
-          errors.password = 'Password is required';
-        } else if (values.password.length < 8) {
-          errors.password = 'Password must be 8 characters long.';
-        } else if (!passwordUpper.test(values.password)) {
-          errors.password = 'Password must contain one upperCase letter';
-        } else if (!passwordLower.test(values.password)) {
-          errors.password = 'Password must contain one lowerCase letter';
-        } else if (!passwordRegex.test(values.password)) {
-          errors.password = 'Password must contain one number';
-        } else if (!passwordSpecial.test(values.password)) {
-          errors.password = 'Password must contain one special character';
-        }
+              // Username validation
+              if (!values.username) {
+                errors.username = "Username is required";
+              }
 
-        return errors;
-      }}
-    >
-      {(props) => {
-        const {
-          values,
-          touched,
-          errors,
-          isSubmitting,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-        } = props;
+              // EMAIL SECTION
+              if (!values.email) {
+                errors.email = "Email is required";
+              } else if (!EmailValidator.validate(values.email)) {
+                errors.email = "Invalid email address";
+              }
 
-        return (
-          <div className={styles.register}>
-            <div className={styles.register_center}>
-              <div className={styles.register_left}>
-                <p>
-                  Reach out to your loved ones
-                  <br /> as soon as you can...
-                </p>
-              </div>
+              // PASSWORD SECTION
+              if (!values.password) {
+                errors.password = "Password is required";
+              } else if (values.password.length < 8) {
+                errors.password = "Password must be at least 8 characters long";
+              } else if (!passwordUpper.test(values.password)) {
+                errors.password = "Password must contain one uppercase letter";
+              } else if (!passwordLower.test(values.password)) {
+                errors.password = "Password must contain one lowercase letter";
+              } else if (!passwordRegex.test(values.password)) {
+                errors.password = "Password must contain one number";
+              } else if (!passwordSpecial.test(values.password)) {
+                errors.password = "Password must contain one special character";
+              }
 
-              <div className={styles.register_right}>
-                <div className={styles.register_right_div}>
-                  <div className={styles.register_right_top}>
-                    <h3>Register Account</h3>
-                  </div>
+              return errors;
+            }}
+          >
+            {(props) => {
+              const {
+                values,
+                touched,
+                errors,
+                isSubmitting,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+              } = props;
 
-                  <div className={styles.register_right_bottom}>
-
-                    <form onSubmit={handleSubmit}>
-                      <div className={styles.form_group}>
-                        <label htmlFor='email'>Email Address</label>
-                        <input
-                          name='email'
-                          type='text'
-                          placeholder='bright@example.com'
-                          value={values.email}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          
-                        />
-                        {errors.email && touched.email && (
-                          <div className={styles.input_feedback}>
-                            {errors.email}
+              return (
+                <div className={styles.login}>
+                  <div className={styles.login_center}>
+                    <div className={styles.login_right}>
+                      <div className={styles.login_right_div}>
+                        <div className={styles.login_right_top}>
+                          <h3>Welcome!</h3>
+                          <p>Sign up to continue</p>
+                        </div>
+                        <div className={styles.login_right_bottom}>
+                          <form onSubmit={handleSubmit}>
+                            <div className={styles.form_group}>
+                              <label htmlFor="first_name">First Name</label>
+                              <input
+                                name="first_name"
+                                type="text"
+                                placeholder="Enter your First name"
+                                value={values.first_name}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                              {errors.first_name && touched.first_name && (
+                                <div className={styles.input_feedback}>
+                                  {errors.first_name}
+                                </div>
+                              )}
+                            </div>
+                            <div className={styles.form_group}>
+                              <label htmlFor="last_name">Last Name</label>
+                              <input
+                                name="last_name"
+                                type="text"
+                                placeholder="Enter your last name"
+                                value={values.last_name}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                              {errors.last_name && touched.last_name && (
+                                <div className={styles.input_feedback}>
+                                  {errors.last_name}
+                                </div>
+                              )}
+                            </div>
+                            <div className={styles.form_group}>
+                              <label htmlFor="username">Username</label>
+                              <input
+                                name="username"
+                                type="text"
+                                placeholder="Enter your username"
+                                value={values.username}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                              {errors.username && touched.username && (
+                                <div className={styles.input_feedback}>
+                                  {errors.username}
+                                </div>
+                              )}
+                            </div>
+                            <div className={styles.form_group}>
+                              <label htmlFor="email">Email Address</label>
+                              <input
+                                name="email"
+                                type="text"
+                                placeholder="bright@example.com"
+                                value={values.email}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                              {errors.email && touched.email && (
+                                <div className={styles.input_feedback}>
+                                  {errors.email}
+                                </div>
+                              )}
+                            </div>
+                            <div className={styles.form_group}>
+                              <label htmlFor="password">Password</label>
+                              <input
+                                name="password"
+                                type={typePass ? "text" : "password"}
+                                placeholder="Enter your password"
+                                value={values.password}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                              />
+                              {errors.password && touched.password && (
+                                <div className={styles.input_feedback}>
+                                  {errors.password}
+                                </div>
+                              )}
+                              <div
+                                className={styles.eye}
+                                onClick={() => setTypePass(!typePass)}
+                              >
+                                {typePass ? <FaEyeSlash /> : <FaEye />}
+                              </div>
+                            </div>
+                            <div className={styles.form_group}>
+                              <button type="submit" disabled={isSubmitting}>
+                                {loading ? "Loading" : "Sign up"}
+                              </button>
+                            </div>
+                          </form>
+                          <div className={styles.reg}>
+                            <small>
+                              Already a member? <Link href="/login">Login</Link>
+                            </small>
                           </div>
-                        )}
-                      </div>
-
-                      <div className={styles.form_group}>
-                        <label htmlFor='username'>Display Name</label>
-                        <input
-                          name='username'
-                          type='text'
-                          placeholder='bright'
-                          value={values.username}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          
-                        />
-                        {errors.email && touched.username && (
-                          <div className={styles.input_feedback}>
-                            {errors.username}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={styles.form_group}>
-                        <label htmlFor='password'>Password</label>
-                        <input
-                          name='password'
-                          type={typePass ? 'text' : 'password'}
-                          placeholder='Enter your password'
-                          value={values.password}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          
-                        />
-                        {errors.password && touched.password && (
-                          <div className={styles.input_feedback}>
-                            {errors.password}
-                          </div>
-                        )}
-                        <div
-                          className={errors.password ? styles.eye : styles.eyes}
-                          onClick={() => setTypePass(!typePass)}
-                        >
-                          {typePass ? <FaEyeSlash /> : <FaEye />}
                         </div>
                       </div>
-
-                      <div className={styles.validate}>
-                        <p>Your password must have :</p>
-                        <div className={styles.check}>
-                          {values.password.length >= 8 ? (
-                            <FaCheck className={styles.checker} />
-                          ) : (
-                            <FaTimes className={styles.checking} />
-                          )}
-                          At least 8 characters in length
-                        </div>
-
-                        <div className={styles.check}>
-                          {passwordSpecial.test(values.password) ? (
-                            <FaCheck className={styles.checker} />
-                          ) : (
-                            <FaTimes className={styles.checking} />
-                          )}
-                          At least 1 special character
-                        </div>
-
-                        <div className={styles.check}>
-                          {passwordLower.test(values.password) ? (
-                            <FaCheck className={styles.checker} />
-                          ) : (
-                            <FaTimes className={styles.checking} />
-                          )}
-                          At least 1 lower case
-                        </div>
-
-                        <div className={styles.check}>
-                          {passwordUpper.test(values.password) ? (
-                            <FaCheck className={styles.checker} />
-                          ) : (
-                            <FaTimes className={styles.checking} />
-                          )}
-                          At least 1 upper case
-                        </div>
-
-                        <div className={styles.check}>
-                          {passwordRegex.test(values.password) ? (
-                            <FaCheck className={styles.checker} />
-                          ) : (
-                            <FaTimes className={styles.checking} />
-                          )}
-                          At least 1 one number
-                        </div>
-                      </div>
-
-                      <div className={styles.form_group}>
-                        <button type='submit'>
-                          {loading === true ? (
-                            "Loading..."
-                          ) : (
-                            'Sign up'
-                          )}
-                        </button>
-                      </div>
-                    </form>
-
-                    {/* <div className={styles.social}>
-                      <p>Sign up using</p>
-                      <div className={styles.social_div}></div>
-                    </div> */}
-
-                    <div className={styles.reg}>
-                      <small>
-                        Already a member? <Link href='/'>Login</Link>
-                      </small>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        );
-      }}
-    </Formik>
+              );
+            }}
+          </Formik>
+        </div>
+      </div>
+    </>
   );
 };
 
