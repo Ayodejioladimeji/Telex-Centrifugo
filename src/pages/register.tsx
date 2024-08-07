@@ -8,6 +8,14 @@ import Link from "next/link";
 import cogoToast from "cogo-toast";
 import Image from "next/image";
 
+interface ValidationErrors {
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
+}
+
 // VALIDATION REGEX
 const passwordUpper = /(?=.*[A-Z])/;
 const passwordSpecial = /(?=.*[!@#$%^&*])/;
@@ -100,7 +108,7 @@ const Register = () => {
               }, 500);
             }}
             validate={(values) => {
-              let errors = {};
+              let errors: ValidationErrors = {};
 
               // Firstname validation
               if (!values.first_name) {
