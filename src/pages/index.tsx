@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://staging.api-golang.boilerplate.hng.tech/api/v1/auth/login",
+        "https://api-golang.boilerplate.hng.tech/api/v1/auth/login",
         {
           method: "POST",
           headers: {
@@ -38,6 +38,8 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        localStorage.setItem("access_token", data.data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.data.user));
         cogoToast.success("Login successful!");
         router.push(`/message`);
       } else {

@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { Modal } from "react-bootstrap";
 import styles from "@/styles/modal.module.css"
 import { useRouter } from "next/router";
-import cogoToast from "cogo-toast";
+import cogoToast from "cogo-toast"; 
 
 //
 
@@ -22,7 +22,7 @@ const NameModal = () => {
       return cogoToast.error(`Please use your Login username, ${user?.username}`);
     }
 
-    router.push(`/message/${state?.route}`)
+    router.push(`/message/${state?.id}`)
     dispatch({type:ACTIONS.USER, payload:name})
     dispatch({type:ACTIONS.NAME_MODAL, payload:false})
   }

@@ -5,13 +5,15 @@ import { ACTIONS } from '@/store/Actions';
 import NameModal from '@/common/name-modal';
 
 
-const UserCard = ({ item, onRemove }) => {
+const UserCard = ({ item, id, onRemove }) => {
   const { state, dispatch } = useContext(DataContext);
   const [name, setName] = useState(null);
 
   const handleCardClick = () => {
     setName(item);
+    console.log(name)
     dispatch({type:ACTIONS.ROUTE, payload:item})
+    dispatch({type:ACTIONS.ID, payload:id})
     dispatch({ type: ACTIONS.NAME_MODAL, payload: true });
   };
 
@@ -26,7 +28,7 @@ const UserCard = ({ item, onRemove }) => {
           </div>
         </div>
       </div>
-      <span className={styles.cancel} onClick={() => onRemove(item)}>X</span>
+      <span className={styles.cancel} onClick={() => onRemove(id)}>X</span>
 
 
       {state?.nameModal && <NameModal />}

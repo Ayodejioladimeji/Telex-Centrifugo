@@ -88,6 +88,13 @@
   margin-bottom: 5px;
 }
 
+.chat_time {
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.5;
+  margin: 0px 5px;
+}
+
 .chat_text .time {
   font-size: 11px;
   color: var(--white);

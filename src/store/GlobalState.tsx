@@ -9,6 +9,7 @@ export const DataProvider = ({ children }: any) => {
     rooms:null,
     nameModal:false,
     route:null,
+    id:null,
   };
 
   const [state, dispatch] = useReducer(reducers, initialState);
