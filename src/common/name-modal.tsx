@@ -18,9 +18,9 @@ const NameModal = () => {
     const user = JSON.parse(localStorage.getItem("user"))
     const trimedName = name.trim()
 
-    if (user?.username && trimedName !== user.username) {
-      return cogoToast.error(`Please use your Login username, ${user?.username}`);
-    }
+    // if (user?.username && trimedName !== user.username) {
+    //   return cogoToast.error(`Please use your Login username, ${user?.username}`);
+    // }
 
     router.push(`/message/${state?.id}`)
     dispatch({type:ACTIONS.USER, payload:name})

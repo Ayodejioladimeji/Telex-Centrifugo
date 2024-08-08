@@ -102,6 +102,22 @@
   display: block;
 }
 
+.message_header .header_content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.message_header .room_name {
+  flex: 1;
+  text-align: center;
+}
+
+.message_header .icons {
+  cursor: pointer;
+}
+
 .chat_time {
   font-size: 11px;
   color: var(--white);

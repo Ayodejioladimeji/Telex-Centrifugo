@@ -16,6 +16,7 @@ interface User {
 
 interface Room {
   room_id: string;
+  user_id: string;
   name: string;
   description: string;
   users: User[] | null;
@@ -30,16 +31,16 @@ const ChatList = ({ showNav, setShowNav }) => {
   const [name, setName] = useState("");
   const { dispatch } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // Load existing rooms from database on component mount
   useEffect(() => {
     const fetchRooms = async () => {
       try {
         const accessToken = localStorage.getItem('access_token');
-        const response = await axios.get("https://api-golang.boilerplate.hng.tech/api/v1/rooms", {
+        const response = await axios.get(`${apiUrl}/rooms`, {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Access-Control-Allow-Origin': '*'
+            'Authorization': `Bearer ${accessToken}`
           }
         });
 
@@ -74,7 +75,7 @@ const ChatList = ({ showNav, setShowNav }) => {
       const accessToken = localStorage.getItem('access_token');
       const user = localStorage.getItem('user');
       const userData = user ? JSON.parse(user) : {};
-      const response = await axios.post("https://api-golang.boilerplate.hng.tech/api/v1/rooms", {
+      const response = await axios.post(`${apiUrl}/rooms`, {
         name: name.trim(),
         username: userData.username || '',
         description: name.trim()
@@ -110,7 +111,7 @@ const ChatList = ({ showNav, setShowNav }) => {
     setLoading(true);
     const accessToken = localStorage.getItem('access_token');
     const response = await axios.post(
-      `https://api-golang.boilerplate.hng.tech/api/v1/rooms/${roomId}/leave`,
+      `${apiUrl}/rooms/${roomId}/leave`,
       {},
       {
         headers: {
@@ -118,7 +119,6 @@ const ChatList = ({ showNav, setShowNav }) => {
         }
       }
     );
-
     console.log(response);
     if (response?.status !== 200) {
       cogoToast.error("An error occurred while leaving the room.");
@@ -132,6 +132,39 @@ const ChatList = ({ showNav, setShowNav }) => {
     }
     setLoading(false);
   };
+
+  // Delete Room
+  const handleDelete = async (roomId: string) => {
+    // Check if the room ID exists in the list
+    const roomToRemove = room.find(item => item.room_id === roomId);
+    if (!roomToRemove) {
+      return cogoToast.error("Room not found.");
+    }
+
+    setLoading(true);
+    const accessToken = localStorage.getItem('access_token');
+    const response = await axios.delete(
+      `${apiUrl}/rooms/${roomId}`,
+      {},
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      }
+    );
+    console.log(response);
+    if (response?.status !== 200) {
+      cogoToast.error("An error occurred while leaving the room.");
+      return
+    }
+    else {
+      console.log(room)
+      const updatedList = room.filter(item => item.room_id !== roomId);
+      setRoom(updatedList);
+      cogoToast.success("Successfully left the room.");
+    }
+    setLoading(false);
+  }
 
   return (
     <div className={styles.chat_list}>
@@ -153,7 +186,7 @@ const ChatList = ({ showNav, setShowNav }) => {
       <hr />
 
       {room?.map((item, index) => (
-        <UserCard id={item.room_id} item={item.name} key={index} onRemove={handleRemove} />
+        <UserCard admin_id={item.user_id} id={item.room_id} item={item.name} key={index} onRemove={handleRemove} onDelete={handleDelete} />
       ))}
 
       {!loading && room?.length === 0 && (
