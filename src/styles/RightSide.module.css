@@ -92,7 +92,7 @@
   font-size: 11px;
   color: var(--white);
   opacity: 0.5;
-  margin: 0px 5px;
+  margin-left: 10px;
 }
 
 .chat_text .time {

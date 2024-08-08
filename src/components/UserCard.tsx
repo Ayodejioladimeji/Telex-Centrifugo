@@ -64,6 +64,16 @@ const UserCard = ({ item, id, admin_id, onDelete }) => {
     }
   };
 
+  const handleClickCard = () => {
+    dispatch({ type: ACTIONS.ROUTE, payload: item })
+    dispatch({ type: ACTIONS.ID, payload: id })
+    if (status) {
+      router.push(`/message/${id}`)
+    } else {
+      cogoToast.error("You haven't joined this room.");
+    }
+  }
+
 
   const handleJoin = async (id: string, item: string) => {
     const accessToken = localStorage.getItem('access_token');
@@ -114,7 +124,7 @@ const UserCard = ({ item, id, admin_id, onDelete }) => {
 
   return (
     <div className={styles.card_box}>
-      <div className={styles.user_card}>
+      <div onClick={handleClickCard} className={styles.user_card}>
         <div>
           <div className={styles.user_link}>
             <div className={styles.user_card_div}>

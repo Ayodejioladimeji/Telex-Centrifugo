@@ -214,13 +214,13 @@ const RightSide = ({ showNav, setShowNav }) => {
   const sendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (message.trim() && centrifuge) {
+      
       try {
         // Publish message to Centrifuge
         const now = new Date();
         const utcString = now.toISOString();
-        console.log("utc string", utcString)
         await subscription?.publish({ username: user?.username, content: message, created_at: utcString });
-        const updatedList = [...messages, { username: user?.username, content: message }];
+        const updatedList = [...messages, { username: user?.username, content: message, created_at: utcString }];
         setMessages(updatedList);
         console.log(messages)
         const accessToken = localStorage.getItem('access_token');
