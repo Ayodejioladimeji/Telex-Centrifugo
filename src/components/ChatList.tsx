@@ -152,7 +152,6 @@ const ChatList = ({ showNav, setShowNav }) => {
     const accessToken = localStorage.getItem('access_token');
     const response = await axios.delete(
       `${apiUrl}/rooms/${roomId}`,
-      {},
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`
