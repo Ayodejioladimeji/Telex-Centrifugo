@@ -86,17 +86,13 @@
 .chat_text {
   padding: 3px 8px;
   margin-bottom: 5px;
-  position: relative;
 }
 
 .chat_time {
   font-size: 11px;
   color: var(--white);
   opacity: 0.5;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  margin: 0 5px;
+  margin: 0px 5px;
 }
 
 .chat_text .time {

@@ -36,15 +36,13 @@ const ChatList = ({ showNav, setShowNav }) => {
     const fetchRooms = async () => {
       try {
         const accessToken = localStorage.getItem('access_token');
-        console.log("token", accessToken)
-        const user = localStorage.getItem('user');
         const response = await axios.get("https://api-golang.boilerplate.hng.tech/api/v1/rooms", {
           headers: {
-            'Authorization': `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken}`,
+            'Access-Control-Allow-Origin': '*'
           }
         });
 
-        console.log(response.data)
         setRoom(response.data.data);
       } catch (error) {
         cogoToast.error(error.message)
@@ -82,7 +80,9 @@ const ChatList = ({ showNav, setShowNav }) => {
         description: name.trim()
       }, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${accessToken}`,
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
         }
       });
 

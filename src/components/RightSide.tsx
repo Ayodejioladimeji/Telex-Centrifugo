@@ -33,6 +33,7 @@ const RightSide = ({ showNav, setShowNav }) => {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const { state } = useContext(DataContext)
   const [user, setUser] = useState(null)
+  const [roomName, setRoomName] = useState("")
 
 
   // get login user
@@ -87,6 +88,22 @@ const RightSide = ({ showNav, setShowNav }) => {
         }
       }
 
+      const checkUser = async () => {
+        try {
+          const accessToken = localStorage.getItem('access_token');
+          const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/user-exist`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          })
+          if (!response.data.data.exist) {
+            joinRoom();
+          }
+        } catch (error) {
+          cogoToast.error(error.message)
+        }
+      }
+
       const joinRoom = async () => {
         try {
           const accessToken = localStorage.getItem('access_token');
@@ -100,9 +117,9 @@ const RightSide = ({ showNav, setShowNav }) => {
           cogoToast.error(error.message)
         }
       }
-
-      joinRoom();
+      checkUser();
       fetchMessages();
+      setRoomName(state?.route);
 
       const centrifugeClient: any = new Centrifuge(
         "wss://api-golang.boilerplate.hng.tech/centrifugo/connection/websocket",
@@ -180,7 +197,10 @@ const RightSide = ({ showNav, setShowNav }) => {
     if (message.trim() && centrifuge) {
       try {
         // Publish message to Centrifuge
-        await subscription?.publish({ username: user?.username, content: message });
+        const now = new Date();
+        const utcString = now.toISOString();
+        console.log("utc string", utcString)
+        await subscription?.publish({ username: user?.username, content: message, created_at: utcString  });
         const updatedList = [...messages, { username: user?.username, content: message }];
         setMessages(updatedList);
         console.log(messages)
@@ -215,7 +235,7 @@ const RightSide = ({ showNav, setShowNav }) => {
       <div className={styles.message_header}>
         <div className="d-flex align-items-center gap-3">
           <FaAlignJustify className={styles.icons} onClick={() => setShowNav(!showNav)} />
-          <p className="mb-0">{state?.route}</p>
+          <h2 className="mb-0">{roomName}</h2>
         </div>
       </div>
 
