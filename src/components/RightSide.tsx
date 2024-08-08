@@ -13,8 +13,7 @@ import styles from '../styles/RightSide.module.css';
 import { Centrifuge, Subscription, SubscriptionStateContext, SubscribedContext, SubscriptionState } from "centrifuge";
 import { DataContext } from '@/store/GlobalState';
 import { FaAlignJustify } from 'react-icons/fa';
-import { getURL } from '@/utils';
-import { type } from 'os';
+import { ACTIONS } from '@/store/Actions';
 
 
 interface Message {
@@ -32,7 +31,7 @@ const RightSide = ({ showNav, setShowNav }) => {
   const { slug } = router.query;
   const [centrifuge, setCentrifuge] = useState<Centrifuge | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const { state } = useContext(DataContext)
+  const { state, dispatch } = useContext(DataContext)
   const [user, setUser] = useState(null)
   const [roomName, setRoomName] = useState("")
   const [realTimeStatus, setRealTimeStatus] = useState("")
@@ -43,7 +42,7 @@ const RightSide = ({ showNav, setShowNav }) => {
   // get login user
   useEffect(() => {
     const user = localStorage.getItem("user");
-    setUser(JSON.parse(user))
+    setUser(JSON.parse(user));
   }, [])
 
   const getConnectionToken = async () => {
@@ -55,6 +54,19 @@ const RightSide = ({ showNav, setShowNav }) => {
     })
     return response?.data?.data?.token
   }
+
+    const SetStatus = async (id: string | string[]) => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        const response = await axios.get(`${apiUrl}/rooms/${id}/user-exist`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        })
+      } catch (error) {
+        cogoToast.error(error.message)
+      }
+    }
 
   const getSubscriptionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
@@ -97,6 +109,7 @@ const RightSide = ({ showNav, setShowNav }) => {
           if (!response.data.data.exist) {
             joinRoom();
           }
+          SetStatus(slug);
         } catch (error) {
           cogoToast.error(error.message)
         }
@@ -110,6 +123,7 @@ const RightSide = ({ showNav, setShowNav }) => {
               'Authorization': `Bearer ${accessToken}`
             }
           })
+          SetStatus(slug);
         } catch (error) {
           console.log(error)
           cogoToast.error(error.message)
@@ -118,6 +132,7 @@ const RightSide = ({ showNav, setShowNav }) => {
       checkUser();
       fetchMessages();
       setRoomName(state?.route);
+      SetStatus(slug);
 
 
       const centrifugeClient: any = new Centrifuge(
