@@ -13,6 +13,7 @@
     "axios": "^1.7.3",
     "centrifuge": "^5.2.2",
     "cogo-toast": "^4.2.3",
+    "date-fns": "^3.6.0",
     "email-validator": "^2.0.4",
     "firebase": "^10.12.5",
     "formik": "^2.4.6",

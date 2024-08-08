@@ -42,7 +42,7 @@ const RightSide = ({ showNav, setShowNav }) => {
     setUser(JSON.parse(user))
   }, [])
 
-  const getConnectionToken = useCallback(async () => {
+  const getConnectionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
     const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/token/connection/`, {
       headers: {
@@ -54,9 +54,9 @@ const RightSide = ({ showNav, setShowNav }) => {
     const token = response?.data?.data?.token
     return response?.data?.data?.token
     // return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNTQ1MDgsImlhdCI6MTcyMzA1NDIwOCwic3ViIjoiMDE5MTJkMDEtMGQ3YS03YTNmLWEzY2ItNDNiMzhjYTkxMzA2In0.U0nbwJYgWWcK8fL78ef_zFqAS5cvIF6aB_Rivexf7lo"
-  }, [])
+  }
 
-  const getSubscriptionToken = useCallback(async () => {
+  const getSubscriptionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
     const response = await axios.post(`https://api-golang.boilerplate.hng.tech/api/v1/token/subscription/`, {
       channel: slug
@@ -67,7 +67,7 @@ const RightSide = ({ showNav, setShowNav }) => {
     });
     // console.log(response.data.data.token);
     return response.data.data.token;
-  }, [slug])
+  }
 
 
   useEffect(() => {
@@ -80,7 +80,8 @@ const RightSide = ({ showNav, setShowNav }) => {
               'Authorization': `Bearer ${accessToken}`
             }
           })
-          setMessages(response.data.data);
+          const reversedMessages = response.data.data.reverse();
+          setMessages(reversedMessages);
         } catch (error) {
           cogoToast.error(error.message)
         }
@@ -171,7 +172,7 @@ const RightSide = ({ showNav, setShowNav }) => {
     }
 
 
-  }, [slug, connected, getSubscriptionToken, getConnectionToken, subscription, user?.username]);
+  }, [slug]);
 
 
   const sendMessage = async (e: FormEvent) => {
@@ -209,14 +210,11 @@ const RightSide = ({ showNav, setShowNav }) => {
     }
   };
 
-  // 
-
   return (
     <Fragment>
       <div className={styles.message_header}>
         <div className="d-flex align-items-center gap-3">
           <FaAlignJustify className={styles.icons} onClick={() => setShowNav(!showNav)} />
-          <p className="mb-0">{user?.username}</p>
           <p className="mb-0">{state?.route}</p>
         </div>
       </div>

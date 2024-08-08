@@ -11,6 +11,7 @@ const UserCard = ({ item, id, onRemove }) => {
 
   const handleCardClick = () => {
     setName(item);
+    console.log(name)
     dispatch({type:ACTIONS.ROUTE, payload:item})
     dispatch({type:ACTIONS.ID, payload:id})
     dispatch({ type: ACTIONS.NAME_MODAL, payload: true });
