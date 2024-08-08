@@ -29,7 +29,6 @@ const ChatList = ({ showNav, setShowNav }) => {
   const [create, setCreate] = useState(false);
   const [room, setRoom] = useState<Room[]>([]);
   const [name, setName] = useState("");
-  const { dispatch } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -51,6 +50,7 @@ const ChatList = ({ showNav, setShowNav }) => {
         });
 
         setRoom(response.data.data);
+        localStorage.setItem('rooms', JSON.stringify(response.data.data))
         console.log(response.data.data)
       } catch (error) {
         cogoToast.error(error.message)
@@ -100,44 +100,12 @@ const ChatList = ({ showNav, setShowNav }) => {
       } else {
         const updatedList = [...room, response.data];
         setRoom(updatedList);
+        localStorage.setItem('rooms', JSON.stringify(updatedList))
         cogoToast.success("channel created successfully");
         setName("");
       }
       setLoading(false);
     }
-  };
-
-  // Remove room
-  const handleRemove = async (roomId: string) => {
-    // Check if the room ID exists in the list
-    const roomToRemove = room.find(item => item.room_id === roomId);
-    if (!roomToRemove) {
-      return cogoToast.error("Room not found.");
-    }
-
-    setLoading(true);
-    const accessToken = localStorage.getItem('access_token');
-    const response = await axios.post(
-      `${apiUrl}/rooms/${roomId}/leave`,
-      {},
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      }
-    );
-    console.log(response);
-    if (response?.status !== 200) {
-      cogoToast.error("An error occurred while leaving the room.");
-      return
-    }
-    else {
-      console.log(room)
-      const updatedList = room.filter(item => item.room_id !== roomId);
-      setRoom(updatedList);
-      cogoToast.success("Successfully left the room.");
-    }
-    setLoading(false);
   };
 
   // Delete Room
@@ -158,35 +126,16 @@ const ChatList = ({ showNav, setShowNav }) => {
         }
       }
     );
-    console.log(response);
     if (response?.status !== 200) {
       cogoToast.error("An error occurred while leaving the room.");
+      const updatedList = room.filter(item => item.room_id !== roomId);
+      setRoom(updatedList);
       return
     }
     else {
       cogoToast.success("Successfully left the room.");
     }
     setLoading(false);
-  }
-
-  const handleJoin = async (id: string, item: string) => {
-        const accessToken = localStorage.getItem('access_token');
-        const response = await axios.post(`${apiUrl}/rooms/${id}/join`, { "username": user?.username }, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        })
-
-        if (response?.status !== 200) {
-          cogoToast.error("An error occurred while joining the room.");
-          return
-        }
-        else {
-          cogoToast.success("Successfully joined the room.");
-        }
-        dispatch({ type: ACTIONS.ROUTE, payload: item })
-        dispatch({ type: ACTIONS.ID, payload: id })
-        dispatch({ type: ACTIONS.NAME_MODAL, payload: true });
   }
 
   return (
@@ -209,7 +158,7 @@ const ChatList = ({ showNav, setShowNav }) => {
       <hr />
 
       {room?.map((item, index) => (
-        <UserCard admin_id={item.owner_id} id={item.room_id} item={item.name} key={index} onRemove={handleRemove} onDelete={handleDelete} onJoin={handleJoin} />
+        <UserCard admin_id={item.owner_id} id={item.room_id} item={item.name} key={index} onDelete={handleDelete} />
       ))}
 
       {!loading && room?.length === 0 && (
