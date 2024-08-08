@@ -16,7 +16,7 @@ interface User {
 
 interface Room {
   room_id: string;
-  user_id: string;
+  owner_id: string;
   name: string;
   description: string;
   users: User[] | null;
@@ -31,9 +31,15 @@ const ChatList = ({ showNav, setShowNav }) => {
   const [name, setName] = useState("");
   const { dispatch } = useContext(DataContext);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  // Load existing rooms from database on component mount
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    setUser(JSON.parse(user))
+  }, [])
+
+
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -45,6 +51,7 @@ const ChatList = ({ showNav, setShowNav }) => {
         });
 
         setRoom(response.data.data);
+        console.log(response.data.data)
       } catch (error) {
         cogoToast.error(error.message)
       } finally {
@@ -158,12 +165,29 @@ const ChatList = ({ showNav, setShowNav }) => {
       return
     }
     else {
-      console.log(room)
-      const updatedList = room.filter(item => item.room_id !== roomId);
-      setRoom(updatedList);
       cogoToast.success("Successfully left the room.");
     }
     setLoading(false);
+  }
+
+  const handleJoin = async (id: string, item: string) => {
+        const accessToken = localStorage.getItem('access_token');
+        const response = await axios.post(`${apiUrl}/rooms/${id}/join`, { "username": user?.username }, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        })
+
+        if (response?.status !== 200) {
+          cogoToast.error("An error occurred while joining the room.");
+          return
+        }
+        else {
+          cogoToast.success("Successfully joined the room.");
+        }
+        dispatch({ type: ACTIONS.ROUTE, payload: item })
+        dispatch({ type: ACTIONS.ID, payload: id })
+        dispatch({ type: ACTIONS.NAME_MODAL, payload: true });
   }
 
   return (
@@ -186,7 +210,7 @@ const ChatList = ({ showNav, setShowNav }) => {
       <hr />
 
       {room?.map((item, index) => (
-        <UserCard admin_id={item.user_id} id={item.room_id} item={item.name} key={index} onRemove={handleRemove} onDelete={handleDelete} />
+        <UserCard admin_id={item.owner_id} id={item.room_id} item={item.name} key={index} onRemove={handleRemove} onDelete={handleDelete} onJoin={handleJoin} />
       ))}
 
       {!loading && room?.length === 0 && (

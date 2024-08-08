@@ -43,13 +43,12 @@ const RightSide = ({ showNav, setShowNav }) => {
   // get login user
   useEffect(() => {
     const user = localStorage.getItem("user");
-    console.log(user);
     setUser(JSON.parse(user))
   }, [])
 
   const getConnectionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
-    const response = await axios.get(`${apiUrl}token/connection/`, {
+    const response = await axios.get(`${apiUrl}/token/connection/`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
