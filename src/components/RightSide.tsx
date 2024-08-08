@@ -10,9 +10,10 @@ import cogoToast from "cogo-toast";
 import MsgDisplay from './MsgDisplay';
 import { useRouter } from 'next/router';
 import styles from '../styles/RightSide.module.css';
-import { Centrifuge, Subscription } from "centrifuge";
+import { Centrifuge, Subscription, SubscriptionStateContext, SubscribedContext, SubscriptionState } from "centrifuge";
 import { DataContext } from '@/store/GlobalState';
 import { FaAlignJustify } from 'react-icons/fa';
+import { getURL } from '@/utils';
 import { type } from 'os';
 
 
@@ -34,39 +35,36 @@ const RightSide = ({ showNav, setShowNav }) => {
   const { state } = useContext(DataContext)
   const [user, setUser] = useState(null)
   const [roomName, setRoomName] = useState("")
+  const [realTimeStatus, setRealTimeStatus] = useState("")
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const centrifugeUrl = process.env.NEXT_PUBLIC_CENTRIFUGE_URL;
 
 
   // get login user
   useEffect(() => {
     const user = localStorage.getItem("user");
-    console.log(user);
     setUser(JSON.parse(user))
   }, [])
 
   const getConnectionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
-    const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/token/connection/`, {
+    const response = await axios.get(`${apiUrl}/token/connection/`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
     })
-    console.log(response.data.data.token);
-    console.log(typeof (response?.data?.data?.token))
-    const token = response?.data?.data?.token
     return response?.data?.data?.token
-    // return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNTQ1MDgsImlhdCI6MTcyMzA1NDIwOCwic3ViIjoiMDE5MTJkMDEtMGQ3YS03YTNmLWEzY2ItNDNiMzhjYTkxMzA2In0.U0nbwJYgWWcK8fL78ef_zFqAS5cvIF6aB_Rivexf7lo"
   }
 
   const getSubscriptionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
-    const response = await axios.post(`https://api-golang.boilerplate.hng.tech/api/v1/token/subscription/`, {
+    const response = await axios.post(`${apiUrl}/token/subscription/`, {
       channel: slug
     }, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
     });
-    // console.log(response.data.data.token);
     return response.data.data.token;
   }
 
@@ -76,7 +74,7 @@ const RightSide = ({ showNav, setShowNav }) => {
       const fetchMessages = async () => {
         try {
           const accessToken = localStorage.getItem('access_token');
-          const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/messages`, {
+          const response = await axios.get(`${apiUrl}/rooms/${slug}/messages`, {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -91,7 +89,7 @@ const RightSide = ({ showNav, setShowNav }) => {
       const checkUser = async () => {
         try {
           const accessToken = localStorage.getItem('access_token');
-          const response = await axios.get(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/user-exist`, {
+          const response = await axios.get(`${apiUrl}/rooms/${slug}/user-exist`, {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -107,7 +105,7 @@ const RightSide = ({ showNav, setShowNav }) => {
       const joinRoom = async () => {
         try {
           const accessToken = localStorage.getItem('access_token');
-          const response = await axios.post(`https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/join`, { "username": user?.username }, {
+          const response = await axios.post(`${apiUrl}/rooms/${slug}/join`, { "username": user?.username }, {
             headers: {
               'Authorization': `Bearer ${accessToken}`
             }
@@ -121,13 +119,11 @@ const RightSide = ({ showNav, setShowNav }) => {
       fetchMessages();
       setRoomName(state?.route);
 
+
       const centrifugeClient: any = new Centrifuge(
-        "wss://api-golang.boilerplate.hng.tech/centrifugo/connection/websocket",
+        `${centrifugeUrl}`,
         {
           getToken: getConnectionToken,
-          // debug: true,
-          // token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMwNTMzODAsInN1YiI6IjAxOTEyZDAxLTBkN2EtN2EzZi1hM2NiLTQzYjM4Y2E5MTMwNiJ9.Mr74BXAzcM_XeBlspGvsYVes2_y_V9P2EDPZCYJMEbE"
-          // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM3MjIiLCJleHAiOjE3MjM0MjY2NzIsImlhdCI6MTcyMjgyMTg3Mn0.zhB3jD1MWGWd0dCTRLOoJvTrhgS3imTbYSUy9--xK8M",
         },
       );
 
@@ -157,6 +153,14 @@ const RightSide = ({ showNav, setShowNav }) => {
         setMessages((prev) => [...prev, ctx.data]);
         console.log("publication", ctx.data)
       });
+
+      sub.on('state', (ctx: SubscriptionStateContext) => {
+        if (ctx.newState == SubscriptionState.Subscribed) {
+          setRealTimeStatus('🟢')
+        } else {
+          setRealTimeStatus('🔴')
+        }
+      })
 
       sub.on("subscribed", () => {
         console.log(`Subscribed to room#${slug}`);
@@ -200,13 +204,13 @@ const RightSide = ({ showNav, setShowNav }) => {
         const now = new Date();
         const utcString = now.toISOString();
         console.log("utc string", utcString)
-        await subscription?.publish({ username: user?.username, content: message, created_at: utcString  });
+        await subscription?.publish({ username: user?.username, content: message, created_at: utcString });
         const updatedList = [...messages, { username: user?.username, content: message }];
         setMessages(updatedList);
         console.log(messages)
         const accessToken = localStorage.getItem('access_token');
         const response = await axios.post(
-          `https://api-golang.boilerplate.hng.tech/api/v1/rooms/${slug}/messages`,
+          `${apiUrl}/rooms/${slug}/messages`,
           {
             content: message
           },
@@ -233,9 +237,12 @@ const RightSide = ({ showNav, setShowNav }) => {
   return (
     <Fragment>
       <div className={styles.message_header}>
-        <div className="d-flex align-items-center gap-3">
-          <FaAlignJustify className={styles.icons} onClick={() => setShowNav(!showNav)} />
-          <h2 className="mb-0">{roomName}</h2>
+        <div className={styles.message_header}>
+          <div className={styles.header_content}>
+            <FaAlignJustify className={styles.icons} onClick={() => setShowNav(!showNav)} />
+            <h2 className={styles.room_name}>{roomName}</h2>
+            <p>{realTimeStatus}</p>
+          </div>
         </div>
       </div>
 

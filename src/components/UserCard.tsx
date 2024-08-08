@@ -1,19 +1,47 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import styles from '../styles/UserCard.module.css';
 import { DataContext } from '@/store/GlobalState';
 import { ACTIONS } from '@/store/Actions';
 import NameModal from '@/common/name-modal';
+import axios from 'axios';
+import cogoToast from "cogo-toast";
+import { useRouter } from "next/router";
 
 
-const UserCard = ({ item, id, onRemove }) => {
+const UserCard = ({ item, id, onRemove, onJoin, admin_id, onDelete }) => {
   const { state, dispatch } = useContext(DataContext);
-  const [name, setName] = useState(null);
+  const [status, setStatus] = useState(null);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const router = useRouter()
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    setUser(JSON.parse(user))
+  }, [])
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const accessToken = localStorage.getItem('access_token');
+        const response = await axios.get(`${apiUrl}/rooms/${id}/user-exist`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        })
+        setStatus(response.data.data.exist)
+      } catch (error) {
+        cogoToast.error(error.message)
+      }
+    }
+    checkUser();
+  }, [])
 
   const handleCardClick = () => {
     setName(item);
     console.log(name)
-    dispatch({type:ACTIONS.ROUTE, payload:item})
-    dispatch({type:ACTIONS.ID, payload:id})
+    dispatch({ type: ACTIONS.ROUTE, payload: item })
+    dispatch({ type: ACTIONS.ID, payload: id })
     dispatch({ type: ACTIONS.NAME_MODAL, payload: true });
   };
 
@@ -28,9 +56,7 @@ const UserCard = ({ item, id, onRemove }) => {
           </div>
         </div>
       </div>
-      <span className={styles.cancel} onClick={() => onRemove(id)}>X</span>
-
-
+      {status ? (<span className={styles.cancel} onClick={() => onRemove(id)}>{admin_id === user?.id ? 'Delete' : 'Leave'}</span>) : (<span className={styles.success} onClick={() => onJoin(id, item)}>Join</span>)}
       {state?.nameModal && <NameModal />}
     </div>
   );

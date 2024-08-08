@@ -39,7 +39,11 @@ const Login = () => {
 
       if (response.ok) {
         localStorage.setItem("access_token", data.data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        const access_token = data.data.access_token;
+        const d = new Date();
+        d.setTime(d.getTime() + (1 * 24 * 60 * 60 * 1000));
+        let expires = "expires=" + d.toUTCString();
+        document.cookie = "access_token" + "=" + access_token + ";" + expires + ";path=/";
         cogoToast.success("Login successful!");
         router.push(`/message`);
       } else {
