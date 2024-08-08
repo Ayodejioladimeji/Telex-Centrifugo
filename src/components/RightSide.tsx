@@ -55,7 +55,7 @@ const RightSide = ({ showNav, setShowNav }) => {
     return response?.data?.data?.token
   }
 
-    const SetStatus = async (id: string) => {
+    const SetStatus = async (id: string | string[]) => {
       try {
         const accessToken = localStorage.getItem('access_token');
         const response = await axios.get(`${apiUrl}/rooms/${id}/user-exist`, {
