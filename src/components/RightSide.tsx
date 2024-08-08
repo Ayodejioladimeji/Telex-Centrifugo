@@ -47,7 +47,7 @@ const RightSide = ({ showNav, setShowNav }) => {
 
   const getConnectionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
-    const response = await axios.get(`${apiUrl}/token/connection/`, {
+    const response = await axios.get(`${apiUrl}/token/connection`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -70,7 +70,7 @@ const RightSide = ({ showNav, setShowNav }) => {
 
   const getSubscriptionToken = async () => {
     const accessToken = localStorage.getItem('access_token');
-    const response = await axios.post(`${apiUrl}/token/subscription/`, {
+    const response = await axios.post(`${apiUrl}/token/subscription`, {
       channel: slug
     }, {
       headers: {
