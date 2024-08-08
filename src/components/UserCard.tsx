@@ -8,7 +8,7 @@ import cogoToast from "cogo-toast";
 import { useRouter } from "next/router";
 
 
-const UserCard = ({ item, id, onRemove, admin_id, onDelete }) => {
+const UserCard = ({ item, id, admin_id, onDelete }) => {
   const { state, dispatch } = useContext(DataContext);
   const [status, setStatus] = useState(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
